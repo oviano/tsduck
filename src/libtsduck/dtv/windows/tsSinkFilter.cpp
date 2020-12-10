@@ -35,6 +35,7 @@
 #include "tsGuard.h"
 #include "tsGuardCondition.h"
 #include "tsIntegerUtils.h"
+#include "tsTuner.h"
 TSDUCK_SOURCE;
 
 // Trace every low-level operation when COM instrumentation is enabled.
@@ -56,7 +57,7 @@ namespace {
 // SinkFilter, the DirectShow filter
 //-----------------------------------------------------------------------------
 
-ts::SinkFilter::SinkFilter(Report& report) :
+ts::SinkFilter::SinkFilter(Tuner* tuner, Report& report) :
     _mutex(),
     _not_empty(),
     _queue(),
@@ -67,7 +68,8 @@ ts::SinkFilter::SinkFilter(Report& report) :
     _ref_count(1),
     _state(::State_Stopped),
     _graph(NULL),
-    _pin(new SinkPin(report, this))
+    _pin(new SinkPin(report, this)),
+    _tuner(tuner)
 {
     TRACE(1, u"SinkFilter constructor, ref=%d", {_ref_count});
     // Initialize packet format to default
@@ -785,8 +787,27 @@ STDMETHODIMP ts::SinkPin::ReceiveMultiple(::IMediaSample** pSamples, long nSampl
         return S_OK;
     }
 
-    // Enqueue all media samples using one single lock section.
+    // Tuner allows media samples to be pushed directly to it?
+    if (_filter->_tuner->allowPush())
     {
+        // Loop on all media samples.
+        while (*nSamplesProcessed < nSamples) {
+            ::IMediaSample* pSample = pSamples[*nSamplesProcessed];
+            long length = pSample->GetActualDataLength();
+            TRACE(2, u"SinkPin::ReceiveMultiple: actual data length: %d bytes, %d packets + %d bytes", { length, length / PKT_SIZE, length % PKT_SIZE });
+            // Locate data area in the media sample.
+            ::BYTE* buffer;
+            if (!ComSuccess(pSample->GetPointer(&buffer), u"IMediaSample::GetPointer", _report)) {
+                // Error getting media sample address
+                length = 0;
+            }
+            _filter->_tuner->push((void*)buffer, (size_t)length);
+            (*nSamplesProcessed)++;
+        }
+    }
+
+    // Enqueue all media samples using one single lock section.
+    else {
         GuardCondition lock(_filter->_mutex, _filter->_not_empty, 1000); // timeout = 1000 ms
         if (!lock.isLocked()) {
             _report.error(u"cannot enqueue media sample, lock timeout");

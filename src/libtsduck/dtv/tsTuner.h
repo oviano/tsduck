@@ -101,7 +101,7 @@ namespace ts {
         //!
         //! Destructor.
         //!
-        ~Tuner();
+        virtual ~Tuner();
 
         //!
         //! Constructor and open device name.
@@ -235,6 +235,12 @@ namespace ts {
         //! Returning zero means error or end of input.
         //!
         size_t receive(TSPacket* buffer, size_t max_packets, const AbortInterface* abort, Report& report);
+
+        //!
+        //! Push packets.
+        //! 
+        virtual bool allowPush() { return false; }
+        virtual void push(const void* data, size_t size) {}
 
         //!
         //! Get the current tuning parameters.

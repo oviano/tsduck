@@ -692,7 +692,7 @@ bool ts::Tuner::Guts::FindTuners(DuckContext& duck, Tuner* tuner, TunerPtrVector
         Tuner& tref(tuner == nullptr ? *tptr : *tuner);
 
         // Try to build a graph from this network provider and tuner
-        if (tref._guts->graph.initialize(tuner_name, tuner_monikers[moniker_index].pointer(), tref._delivery_systems, report)) {
+        if (tref._guts->graph.initialize(tuner_name, tuner_monikers[moniker_index].pointer(), tref._delivery_systems, tuner, report)) {
 
             // Graph correctly built, this is a valid tuner.
             // Check if a device was specified by adapter index.

@@ -90,7 +90,7 @@ void ts::TunerGraph::clear(Report& report)
 // Initialize the graph.
 //-----------------------------------------------------------------------------
 
-bool ts::TunerGraph::initialize(const UString& tuner_name, ::IMoniker* tuner_moniker, DeliverySystemSet& delivery_systems, Report& report)
+bool ts::TunerGraph::initialize(const UString& tuner_name, ::IMoniker* tuner_moniker, DeliverySystemSet& delivery_systems, Tuner* tuner, Report& report)
 {
     // Initialize this object.
     clear(report);
@@ -177,7 +177,7 @@ bool ts::TunerGraph::initialize(const UString& tuner_name, ::IMoniker* tuner_mon
     // Usually work with Terratec driver for instance.
     if (_user_receiver_name.empty()) {
         report.debug(u"trying direct connection from tuner (no receiver)");
-        graph_done = buildGraphAtTee(_tuner_filter, report);
+        graph_done = buildGraphAtTee(_tuner_filter, tuner, report);
     }
 
     // If the tuner cannot be directly connected to the rest of the graph, we need to find
@@ -225,7 +225,7 @@ bool ts::TunerGraph::initialize(const UString& tuner_name, ::IMoniker* tuner_mon
                 }
 
                 // Try to build the rest of the graph
-                if (buildGraphAtTee(receiver_filter, report)) {
+                if (buildGraphAtTee(receiver_filter, tuner, report)) {
                     graph_done = true;
                     report.debug(u"using receiver filter \"%s\"", {receiver_name});
                 }
@@ -293,7 +293,7 @@ bool ts::TunerGraph::initialize(const UString& tuner_name, ::IMoniker* tuner_mon
 // Try to build the part of the graph starting at the tee filter.
 //-----------------------------------------------------------------------------
 
-bool ts::TunerGraph::buildGraphAtTee(const ComPtr<::IBaseFilter>& base_filter, Report& report)
+bool ts::TunerGraph::buildGraphAtTee(const ComPtr<::IBaseFilter>& base_filter, Tuner* tuner, Report& report)
 {
     // Report to use when errors shall be reported in debug mode only
     Report& debug_report(report.debug() ? report : NULLREP);
@@ -314,7 +314,7 @@ bool ts::TunerGraph::buildGraphAtTee(const ComPtr<::IBaseFilter>& base_filter, R
     bool ok = connectFilters(base_filter.pointer(), tee_filter.pointer(), debug_report);
 
     // Create branch A of graph: Create a sink filter, add it to the graph and connect it to the tee.
-    ComPtr<SinkFilter> sink(new SinkFilter(report));
+    ComPtr<SinkFilter> sink(new SinkFilter(tuner, report));
     CheckNonNull(sink.pointer());
     ok = ok &&
          addFilter(sink.pointer(), L"Sink/Capture", report) &&
