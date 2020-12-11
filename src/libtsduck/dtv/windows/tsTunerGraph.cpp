@@ -90,7 +90,7 @@ void ts::TunerGraph::clear(Report& report)
 // Initialize the graph.
 //-----------------------------------------------------------------------------
 
-bool ts::TunerGraph::initialize(const UString& tuner_name, ::IMoniker* tuner_moniker, DeliverySystemSet& delivery_systems, Tuner* tuner, Report& report)
+bool ts::TunerGraph::initialize(const UString& tuner_name, ::IMoniker* tuner_moniker, DeliverySystemSet& delivery_systems, Tuner& tuner, Report& report)
 {
     // Initialize this object.
     clear(report);
@@ -293,7 +293,7 @@ bool ts::TunerGraph::initialize(const UString& tuner_name, ::IMoniker* tuner_mon
 // Try to build the part of the graph starting at the tee filter.
 //-----------------------------------------------------------------------------
 
-bool ts::TunerGraph::buildGraphAtTee(const ComPtr<::IBaseFilter>& base_filter, Tuner* tuner, Report& report)
+bool ts::TunerGraph::buildGraphAtTee(const ComPtr<::IBaseFilter>& base_filter, Tuner& tuner, Report& report)
 {
     // Report to use when errors shall be reported in debug mode only
     Report& debug_report(report.debug() ? report : NULLREP);

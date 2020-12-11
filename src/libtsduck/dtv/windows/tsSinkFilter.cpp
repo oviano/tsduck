@@ -57,7 +57,7 @@ namespace {
 // SinkFilter, the DirectShow filter
 //-----------------------------------------------------------------------------
 
-ts::SinkFilter::SinkFilter(Tuner* tuner, Report& report) :
+ts::SinkFilter::SinkFilter(Tuner& tuner, Report& report) :
     _mutex(),
     _not_empty(),
     _queue(),
@@ -788,7 +788,7 @@ STDMETHODIMP ts::SinkPin::ReceiveMultiple(::IMediaSample** pSamples, long nSampl
     }
 
     // Tuner allows media samples to be pushed directly to it?
-    if (_filter->_tuner->allowPush())
+    if (_filter->_tuner.allowPush())
     {
         // Loop on all media samples.
         while (*nSamplesProcessed < nSamples) {
@@ -801,7 +801,7 @@ STDMETHODIMP ts::SinkPin::ReceiveMultiple(::IMediaSample** pSamples, long nSampl
                 // Error getting media sample address
                 length = 0;
             }
-            _filter->_tuner->push((void*)buffer, (size_t)length);
+            _filter->_tuner.push((void*)buffer, (size_t)length);
             (*nSamplesProcessed)++;
         }
     }

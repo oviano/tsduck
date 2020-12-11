@@ -87,7 +87,7 @@ namespace ts {
         //! @param [in,out] report Where to report errors.
         //! @return True on success, false on error.
         //!
-        bool initialize(const UString& tuner_name, ::IMoniker* tuner_moniker, DeliverySystemSet& delivery_systems, Tuner* tuner, Report& report);
+        bool initialize(const UString& tuner_name, ::IMoniker* tuner_moniker, DeliverySystemSet& delivery_systems, Tuner& tuner, Report& report);
 
         // Inherited methods.
         virtual void clear(Report& report) override;
@@ -220,7 +220,7 @@ namespace ts {
         //! @param [in,out] report Where to report errors.
         //! @return True on success, false on error.
         //!
-        bool buildGraphAtTee(const ComPtr<::IBaseFilter>& base, Tuner* tuner, Report& report);
+        bool buildGraphAtTee(const ComPtr<::IBaseFilter>& base, Tuner& tuner, Report& report);
 
         //!
         //! Try to build the end of the graph starting at the Transport Information Filter (TIF), after the demux filter.

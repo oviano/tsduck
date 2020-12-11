@@ -90,7 +90,7 @@ namespace ts {
         //! Constructor.
         //! @param [in,out] report Where to report errors.
         //!
-        SinkFilter(Tuner* tuner, Report& report);
+        SinkFilter(Tuner& tuner, Report& report);
 
         //!
         //! Destructor.
@@ -179,7 +179,7 @@ namespace ts {
         ::IFilterGraph*  _graph;
         SinkPin*         _pin;
         ::MPEG2_TRANSPORT_STRIDE _stride;    // Description of packet structure
-        Tuner*           _tuner;
+        Tuner&           _tuner;
 
         //!
         //! Fill the user's buffer with data from media samples in _sample_buffer.
